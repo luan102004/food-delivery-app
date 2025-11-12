@@ -7,7 +7,7 @@ import StatsCard from '@/components/dashboard/StatsCard';
 import AnalyticsChart from '@/components/dashboard/AnalyticsChart';
 import { AnalyticsSummary, RevenueChartData, TopItem } from '@/types';
 
-export default function RestaurantDashboardPage() {
+export default function DriverDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [timeframe, setTimeframe] = useState('week');
@@ -16,12 +16,14 @@ export default function RestaurantDashboardPage() {
   const [topItems, setTopItems] = useState<TopItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Nếu chưa đăng nhập thì chuyển hướng đến trang signin
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
     }
   }, [status, router]);
 
+  // Gọi API khi có session và thay đổi timeframe
   useEffect(() => {
     if (session) {
       fetchAnalytics();
@@ -33,9 +35,9 @@ export default function RestaurantDashboardPage() {
     try {
       const response = await fetch(`/api/analytics?timeframe=${timeframe}`);
       const data = await response.json();
-      setSummary(data.summary);
-      setRevenueChart(data.revenueChart);
-      setTopItems(data.topItems);
+      setSummary(data.summary || null);
+      setRevenueChart(data.revenueChart || []);
+      setTopItems(data.topItems || []);
     } catch (error) {
       console.error('Error fetching analytics:', error);
     } finally {
@@ -46,13 +48,14 @@ export default function RestaurantDashboardPage() {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center">Đang tải...</div>
+        <div className="text-center text-gray-600">Đang tải dữ liệu...</div>
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Thống kê doanh thu</h1>
         <select
@@ -117,32 +120,38 @@ export default function RestaurantDashboardPage() {
           Món bán chạy nhất
         </h3>
         <div className="space-y-4">
-          {topItems.map((item, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-            >
-              <div className="flex items-center gap-4">
-                <div className="text-2xl font-bold text-gray-400">
-                  #{index + 1}
+          {topItems && topItems.length > 0 ? (
+            topItems.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="text-2xl font-bold text-gray-400">
+                    #{index + 1}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{item.name}</p>
+                    <p className="text-sm text-gray-600">
+                      Đã bán: {item.quantity} món
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{item.name}</p>
-                  <p className="text-sm text-gray-600">
-                    Đã bán: {item.quantity} món
+                <div className="text-right">
+                  <p className="font-semibold text-green-600">
+                    {new Intl.NumberFormat('vi-VN', {
+                      style: 'currency',
+                      currency: 'VND',
+                    }).format(item.revenue)}
                   </p>
                 </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-green-600">
-                  {new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                  }).format(item.revenue)}
-                </p>
-              </div>
+            ))
+          ) : (
+            <div className="text-gray-500 text-center py-4">
+              Không có dữ liệu món bán chạy
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
