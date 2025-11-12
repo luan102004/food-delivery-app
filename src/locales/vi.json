@@ -1,0 +1,79 @@
+{
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Đã có lỗi xảy ra",
+    "success": "Thành công",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập",
+    "register": "Đăng ký"
+  },
+  "navbar": {
+    "home": "Trang chủ",
+    "orders": "Đơn hàng",
+    "restaurants": "Nhà hàng",
+    "dashboard": "Bảng điều khiển",
+    "profile": "Hồ sơ"
+  },
+  "order": {
+    "title": "Đơn hàng",
+    "orderNumber": "Mã đơn hàng",
+    "status": "Trạng thái",
+    "total": "Tổng cộng",
+    "subtotal": "Tạm tính",
+    "deliveryFee": "Phí giao hàng",
+    "discount": "Giảm giá",
+    "createOrder": "Tạo đơn hàng",
+    "trackOrder": "Theo dõi đơn hàng",
+    "pending": "Chờ xác nhận",
+    "confirmed": "Đã xác nhận",
+    "preparing": "Đang chuẩn bị",
+    "ready": "Sẵn sàng",
+    "picked_up": "Đã lấy hàng",
+    "delivering": "Đang giao",
+    "delivered": "Đã giao",
+    "cancelled": "Đã hủy"
+  },
+  "restaurant": {
+    "title": "Nhà hàng",
+    "menu": "Thực đơn",
+    "rating": "Đánh giá",
+    "cuisine": "Loại ẩm thực",
+    "openingHours": "Giờ mở cửa"
+  },
+  "promotion": {
+    "title": "Khuyến mãi",
+    "code": "Mã khuyến mãi",
+    "apply": "Áp dụng",
+    "enterCode": "Nhập mã khuyến mãi",
+    "invalid": "Mã không hợp lệ",
+    "applied": "Đã áp dụng"
+  },
+  "analytics": {
+    "title": "Thống kê",
+    "revenue": "Doanh thu",
+    "orders": "Đơn hàng",
+    "growth": "Tăng trưởng",
+    "averageOrder": "Giá trị đơn TB",
+    "topItems": "Món bán chạy",
+    "revenueChart": "Biểu đồ doanh thu",
+    "day": "Ngày",
+    "week": "Tuần",
+    "month": "Tháng",
+    "quarter": "Quý",
+    "year": "Năm"
+  },
+  "driver": {
+    "title": "Tài xế",
+    "available": "Sẵn sàng",
+    "unavailable": "Không sẵn sàng",
+    "currentOrder": "Đơn hiện tại",
+    "location": "Vị trí",
+    "updateLocation": "Cập nhật vị trí"
+  }
+}

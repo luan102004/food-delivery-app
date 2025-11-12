@@ -1,0 +1,79 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "filter": "Filter",
+    "logout": "Logout",
+    "login": "Login",
+    "register": "Register"
+  },
+  "navbar": {
+    "home": "Home",
+    "orders": "Orders",
+    "restaurants": "Restaurants",
+    "dashboard": "Dashboard",
+    "profile": "Profile"
+  },
+  "order": {
+    "title": "Orders",
+    "orderNumber": "Order Number",
+    "status": "Status",
+    "total": "Total",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "discount": "Discount",
+    "createOrder": "Create Order",
+    "trackOrder": "Track Order",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "picked_up": "Picked Up",
+    "delivering": "Delivering",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "restaurant": {
+    "title": "Restaurants",
+    "menu": "Menu",
+    "rating": "Rating",
+    "cuisine": "Cuisine",
+    "openingHours": "Opening Hours"
+  },
+  "promotion": {
+    "title": "Promotions",
+    "code": "Promo Code",
+    "apply": "Apply",
+    "enterCode": "Enter promo code",
+    "invalid": "Invalid code",
+    "applied": "Applied"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "revenue": "Revenue",
+    "orders": "Orders",
+    "growth": "Growth",
+    "averageOrder": "Avg Order Value",
+    "topItems": "Top Selling Items",
+    "revenueChart": "Revenue Chart",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "quarter": "Quarter",
+    "year": "Year"
+  },
+  "driver": {
+    "title": "Driver",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "currentOrder": "Current Order",
+    "location": "Location",
+    "updateLocation": "Update Location"
+  }
+}

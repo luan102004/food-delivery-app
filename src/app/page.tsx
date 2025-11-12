@@ -1,101 +1,131 @@
-import Image from "next/image";
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
-export default function Home() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    switch (session.user.role) {
+      case 'customer':
+        redirect('/customer');
+      case 'restaurant':
+        redirect('/restaurant');
+      case 'driver':
+        redirect('/driver');
+      case 'admin':
+        redirect('/admin');
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-6">🍔 Food Delivery App</h1>
+            <p className="text-xl mb-8 max-w-2xl mx-auto">
+              Đặt món ăn yêu thích, theo dõi đơn hàng realtime, và nhận ưu đãi
+              hấp dẫn
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Link
+                href="/auth/signin"
+                className="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+              >
+                Đăng nhập
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-800 transition-colors border-2 border-white"
+              >
+                Đăng ký ngay
+              </Link>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Tính năng nổi bật
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center p-6">
+              <div className="text-5xl mb-4">🗺️</div>
+              <h3 className="text-xl font-semibold mb-2">
+                Theo dõi realtime
+              </h3>
+              <p className="text-gray-600">
+                Xem vị trí tài xế và đơn hàng của bạn trên bản đồ thời gian thực
+              </p>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-5xl mb-4">🎫</div>
+              <h3 className="text-xl font-semibold mb-2">
+                Mã giảm giá
+              </h3>
+              <p className="text-gray-600">
+                Nhiều ưu đãi hấp dẫn với hệ thống khuyến mãi đa dạng
+              </p>
+            </div>
+            <div className="text-center p-6">
+              <div className="text-5xl mb-4">📊</div>
+              <h3 className="text-xl font-semibold mb-2">
+                Thống kê chi tiết
+              </h3>
+              <p className="text-gray-600">
+                Dashboard phân tích doanh thu và hiệu suất kinh doanh
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Roles Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Dành cho mọi đối tượng
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-4">👤</div>
+              <h3 className="text-xl font-semibold mb-2">Khách hàng</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>✓ Đặt món dễ dàng</li>
+                <li>✓ Theo dõi đơn hàng realtime</li>
+                <li>✓ Áp dụng mã giảm giá</li>
+                <li>✓ Đánh giá nhà hàng</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-4">🏪</div>
+              <h3 className="text-xl font-semibold mb-2">Nhà hàng</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>✓ Quản lý menu</li>
+                <li>✓ Nhận đơn hàng</li>
+                <li>✓ Xem thống kê doanh thu</li>
+                <li>✓ Tạo khuyến mãi</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="text-4xl mb-4">🚗</div>
+              <h3 className="text-xl font-semibold mb-2">Tài xế</h3>
+              <ul className="space-y-2 text-gray-600">
+                <li>✓ Nhận đơn giao hàng</li>
+                <li>✓ Cập nhật vị trí realtime</li>
+                <li>✓ Bật/tắt trạng thái</li>
+                <li>✓ Xem lịch sử giao hàng</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
