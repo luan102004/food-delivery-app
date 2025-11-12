@@ -9,31 +9,41 @@ export default function Navbar() {
   const { data: session } = useSession();
   const { t } = useLanguage();
 
+  // 🔗 Danh sách link hiển thị dựa theo vai trò người dùng
   const getRoleBasedLinks = () => {
     if (!session) return [];
+
+    const baseLinks = [
+      { href: '/profile', label: t('navbar.profile') }, // 🔹 Thêm link Profile chung cho tất cả
+    ];
 
     switch (session.user.role) {
       case 'customer':
         return [
           { href: '/customer', label: t('navbar.home') },
           { href: '/customer/order', label: t('navbar.orders') },
+          ...baseLinks,
         ];
       case 'restaurant':
         return [
           { href: '/restaurant', label: t('navbar.home') },
           { href: '/restaurant/dashboard', label: t('navbar.dashboard') },
+          ...baseLinks,
         ];
       case 'driver':
         return [
           { href: '/driver', label: t('navbar.home') },
           { href: '/driver/dashboard', label: t('navbar.dashboard') },
+          ...baseLinks,
         ];
       case 'admin':
         return [
           { href: '/admin', label: t('navbar.dashboard') },
+          { href: '/admin/users', label: 'Users' },
+          ...baseLinks,
         ];
       default:
-        return [];
+        return baseLinks;
     }
   };
 
@@ -41,6 +51,7 @@ export default function Navbar() {
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
+          {/* Logo + Navigation Links */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <span className="text-2xl">🍔</span>
@@ -49,6 +60,7 @@ export default function Navbar() {
               </span>
             </Link>
 
+            {/* Nav links */}
             <div className="hidden md:ml-10 md:flex md:space-x-8">
               {getRoleBasedLinks().map((link) => (
                 <Link
@@ -62,6 +74,7 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Language + Auth Buttons */}
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
 

@@ -315,9 +315,48 @@ async function seed() {
         isActive: true,
       },
     ]);
+    // Create more sample users
+const moreCustomers = await User.insertMany([
+  {
+    name: 'Trần Thị B',
+    email: 'customer2@demo.com',
+    password: hashedPassword,
+    role: 'customer',
+    phone: '0901234567',
+    isActive: true,
+  },
+  {
+    name: 'Lê Văn C',
+    email: 'customer3@demo.com',
+    password: hashedPassword,
+    role: 'customer',
+    phone: '0902345678',
+    isActive: true,
+  },
+]);
+
+const moreDrivers = await User.insertMany([
+  {
+    name: 'Nguyễn Văn D',
+    email: 'driver2@demo.com',
+    password: hashedPassword,
+    role: 'driver',
+    phone: '0903456789',
+    isActive: true,
+  },
+  {
+    name: 'Phạm Thị E',
+    email: 'driver3@demo.com',
+    password: hashedPassword,
+    role: 'driver',
+    phone: '0904567890',
+    isActive: true,
+  },
+]);
+
 
     console.log('🎫 Created promotions');
-
+    console.log('👥 Created additional users');
     console.log('\n✅ Seeding completed successfully!');
     console.log('\n📝 Demo accounts:');
     console.log('Customer: customer@demo.com / password123');
