@@ -26,6 +26,7 @@ export default function AdminPromotionsPage() {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+
   const [formData, setFormData] = useState({
     code: '',
     description: '',
@@ -39,11 +40,8 @@ export default function AdminPromotionsPage() {
   });
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    } else if (session?.user.role !== 'admin') {
-      router.push('/');
-    }
+    if (status === 'unauthenticated') router.push('/auth/signin');
+    else if (session?.user.role !== 'admin') router.push('/');
   }, [status, session, router]);
 
   useEffect(() => {
@@ -81,6 +79,7 @@ export default function AdminPromotionsPage() {
       if (response.ok) {
         alert('Tạo khuyến mãi thành công!');
         setShowForm(false);
+
         setFormData({
           code: '',
           description: '',
@@ -92,6 +91,7 @@ export default function AdminPromotionsPage() {
           endDate: '',
           usageLimit: 100,
         });
+
         fetchPromotions();
       } else {
         const data = await response.json();
@@ -111,9 +111,7 @@ export default function AdminPromotionsPage() {
         body: JSON.stringify({ promotionId: id, isActive: !currentStatus }),
       });
 
-      if (response.ok) {
-        fetchPromotions();
-      }
+      if (response.ok) fetchPromotions();
     } catch (error) {
       console.error('Error toggling promotion:', error);
     }
@@ -164,10 +162,11 @@ export default function AdminPromotionsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Quản lý khuyến mãi
-        </h1>
+        <h1 className="text-3xl font-bold text-gray-900">Quản lý khuyến mãi</h1>
+
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
@@ -176,18 +175,22 @@ export default function AdminPromotionsPage() {
         </button>
       </div>
 
-      {/* Create Form */}
+      {/* Form */}
       {showForm && (
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-lg shadow-md p-6 mb-6 space-y-4"
         >
           <div className="grid md:grid-cols-2 gap-4">
+            
+            {/* MÃ KHUYẾN MÃI */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="code" className="block text-sm font-medium text-gray-700 mb-2">
                 Mã khuyến mãi *
               </label>
               <input
+                id="code"
+                name="code"
                 type="text"
                 value={formData.code}
                 onChange={(e) =>
@@ -199,11 +202,14 @@ export default function AdminPromotionsPage() {
               />
             </div>
 
+            {/* LOẠI */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-2">
                 Loại giảm giá *
               </label>
               <select
+                id="type"
+                name="type"
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                 required
@@ -216,11 +222,14 @@ export default function AdminPromotionsPage() {
             </div>
           </div>
 
+          {/* MÔ TẢ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
               Mô tả *
             </label>
             <textarea
+              id="description"
+              name="description"
               value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
@@ -232,12 +241,17 @@ export default function AdminPromotionsPage() {
             />
           </div>
 
+          {/* GIÁ TRỊ + ĐƠN TỐI THIỂU + GIẢM TỐI ĐA */}
           <div className="grid md:grid-cols-3 gap-4">
+            
+            {/* VALUE */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="value" className="block text-sm font-medium text-gray-700 mb-2">
                 Giá trị *
               </label>
               <input
+                id="value"
+                name="value"
                 type="number"
                 value={formData.value}
                 onChange={(e) =>
@@ -253,11 +267,14 @@ export default function AdminPromotionsPage() {
               </p>
             </div>
 
+            {/* MIN ORDER */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="minOrderAmount" className="block text-sm font-medium text-gray-700 mb-2">
                 Đơn tối thiểu (VND)
               </label>
               <input
+                id="minOrderAmount"
+                name="minOrderAmount"
                 type="number"
                 value={formData.minOrderAmount}
                 onChange={(e) =>
@@ -271,12 +288,15 @@ export default function AdminPromotionsPage() {
               />
             </div>
 
+            {/* MAX DISCOUNT - chỉ cho percentage */}
             {formData.type === 'percentage' && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="maxDiscount" className="block text-sm font-medium text-gray-700 mb-2">
                   Giảm tối đa (VND)
                 </label>
                 <input
+                  id="maxDiscount"
+                  name="maxDiscount"
                   type="number"
                   value={formData.maxDiscount}
                   onChange={(e) =>
@@ -292,12 +312,16 @@ export default function AdminPromotionsPage() {
             )}
           </div>
 
+          {/* TIME + LIMIT */}
           <div className="grid md:grid-cols-3 gap-4">
+            
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Ngày bắt đầu *
               </label>
               <input
+                id="startDate"
+                name="startDate"
                 type="datetime-local"
                 value={formData.startDate}
                 onChange={(e) =>
@@ -309,10 +333,12 @@ export default function AdminPromotionsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
                 Ngày kết thúc *
               </label>
               <input
+                id="endDate"
+                name="endDate"
                 type="datetime-local"
                 value={formData.endDate}
                 onChange={(e) =>
@@ -324,10 +350,12 @@ export default function AdminPromotionsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="usageLimit" className="block text-sm font-medium text-gray-700 mb-2">
                 Giới hạn sử dụng *
               </label>
               <input
+                id="usageLimit"
+                name="usageLimit"
                 type="number"
                 value={formData.usageLimit}
                 onChange={(e) =>
@@ -352,48 +380,33 @@ export default function AdminPromotionsPage() {
         </form>
       )}
 
-      {/* Promotions List */}
+      {/* Danh sách khuyến mãi */}
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Mã
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Mô tả
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Loại
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Giá trị
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Sử dụng
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Thời gian
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Trạng thái
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Hành động
-              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Loại</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá trị</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sử dụng</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thời gian</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hành động</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {promotions.map((promo) => (
               <tr key={promo._id} className="hover:bg-gray-50">
+                
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="font-mono font-bold text-blue-600">
-                    {promo.code}
-                  </span>
+                  <span className="font-mono font-bold text-blue-600">{promo.code}</span>
                 </td>
+
                 <td className="px-6 py-4">
                   <div className="text-sm text-gray-900">{promo.description}</div>
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${getTypeBadge(
@@ -403,6 +416,7 @@ export default function AdminPromotionsPage() {
                     {getTypeLabel(promo.type)}
                   </span>
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {promo.type === 'percentage'
@@ -411,29 +425,34 @@ export default function AdminPromotionsPage() {
                       ? `${promo.value.toLocaleString()}đ`
                       : 'Free Ship'}
                   </div>
+
                   {promo.minOrderAmount > 0 && (
                     <div className="text-xs text-gray-500">
                       Đơn từ {promo.minOrderAmount.toLocaleString()}đ
                     </div>
                   )}
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {promo.usageCount} / {promo.usageLimit}
                   </div>
+
                   <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
                     <div
                       className="bg-blue-600 h-2 rounded-full"
                       style={{
                         width: `${(promo.usageCount / promo.usageLimit) * 100}%`,
                       }}
-                    />
+                    ></div>
                   </div>
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>{format(new Date(promo.startDate), 'dd/MM/yyyy')}</div>
                   <div>{format(new Date(promo.endDate), 'dd/MM/yyyy')}</div>
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
                     onClick={() => togglePromotion(promo._id, promo.isActive)}
@@ -446,6 +465,7 @@ export default function AdminPromotionsPage() {
                     {promo.isActive ? '🟢 Hoạt động' : '🔴 Vô hiệu'}
                   </button>
                 </td>
+
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                   <button
                     onClick={() => deletePromotion(promo._id)}
@@ -454,6 +474,7 @@ export default function AdminPromotionsPage() {
                     Xóa
                   </button>
                 </td>
+
               </tr>
             ))}
           </tbody>
@@ -465,6 +486,7 @@ export default function AdminPromotionsPage() {
           </div>
         )}
       </div>
+
     </div>
   );
 }

@@ -4,12 +4,27 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
+interface RestaurantOwner {
+  _id: string;
+  name: string;
+  email: string;
+}
+
+interface Restaurant {
+  _id: string;
+  name: string;
+  address: string;
+  cuisine: string[];
+}
+
 export default function AssignRestaurantPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [restaurantOwners, setRestaurantOwners] = useState<any[]>([]);
-  const [restaurants, setRestaurants] = useState<any[]>([]);
+
+  const [restaurantOwners, setRestaurantOwners] = useState<RestaurantOwner[]>([]);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [selectedOwner, setSelectedOwner] = useState('');
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -21,14 +36,13 @@ export default function AssignRestaurantPage() {
     cuisine: '',
   });
 
+  // Check auth
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/auth/signin');
-    } else if (session?.user.role !== 'admin') {
-      router.push('/');
-    }
+    if (status === 'unauthenticated') router.push('/auth/signin');
+    else if (session?.user.role !== 'admin') router.push('/');
   }, [status, session, router]);
 
+  // Load owners + restaurants
   useEffect(() => {
     if (session?.user.role === 'admin') {
       fetchRestaurantOwners();
@@ -98,12 +112,14 @@ export default function AssignRestaurantPage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
+        
         {/* Select Owner */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="owner" className="block text-sm font-medium text-gray-700 mb-2">
             Chủ nhà hàng *
           </label>
           <select
+            id="owner"
             value={selectedOwner}
             onChange={(e) => setSelectedOwner(e.target.value)}
             required
@@ -121,109 +137,123 @@ export default function AssignRestaurantPage() {
         {/* Restaurant Details */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
               Tên nhà hàng *
             </label>
             <input
+              id="name"
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
               Số điện thoại *
             </label>
             <input
+              id="phone"
               type="tel"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
             Mô tả *
           </label>
           <textarea
+            id="description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             required
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
             Địa chỉ *
           </label>
           <input
+            id="address"
             type="text"
             value={formData.address}
             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md"
           />
         </div>
 
+        {/* Latitude + Longitude */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="lat" className="block text-sm font-medium text-gray-700 mb-2">
               Vĩ độ (Latitude)
             </label>
             <input
+              id="lat"
               type="number"
               step="0.000001"
               value={formData.latitude}
-              onChange={(e) => setFormData({ ...formData, latitude: parseFloat(e.target.value) })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              onChange={(e) =>
+                setFormData({ ...formData, latitude: parseFloat(e.target.value) })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="lng" className="block text-sm font-medium text-gray-700 mb-2">
               Kinh độ (Longitude)
             </label>
             <input
+              id="lng"
               type="number"
               step="0.000001"
               value={formData.longitude}
-              onChange={(e) => setFormData({ ...formData, longitude: parseFloat(e.target.value) })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              onChange={(e) =>
+                setFormData({ ...formData, longitude: parseFloat(e.target.value) })
+              }
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
         </div>
 
+        {/* Email + Cuisine */}
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email
             </label>
             <input
+              id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="cuisine" className="block text-sm font-medium text-gray-700 mb-2">
               Loại ẩm thực (phân cách bằng dấu phẩy)
             </label>
             <input
+              id="cuisine"
               type="text"
               value={formData.cuisine}
               onChange={(e) => setFormData({ ...formData, cuisine: e.target.value })}
               placeholder="Vietnamese, Fast Food, Pizza"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
             />
           </div>
         </div>
@@ -245,13 +275,14 @@ export default function AssignRestaurantPage() {
         </div>
       </form>
 
-      {/* Existing Restaurants */}
+      {/* List Restaurants */}
       <div className="mt-8 bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">
           Nhà hàng đã tạo ({restaurants.length})
         </h2>
+
         <div className="space-y-3">
-          {restaurants.map((restaurant: any) => (
+          {restaurants.map((restaurant) => (
             <div
               key={restaurant._id}
               className="flex justify-between items-center p-4 border border-gray-200 rounded-lg"

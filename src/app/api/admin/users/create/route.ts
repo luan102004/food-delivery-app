@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import bcrypt from 'bcryptjs';
+import Notification from '@/models/Notification';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
+
     if (!session || session.user.role !== 'admin') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -17,7 +19,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, email, password, phone, role, address, isActive } = body;
 
-    // Validation
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: 'Vui lòng điền đầy đủ thông tin bắt buộc' },
@@ -25,7 +26,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return NextResponse.json(
@@ -34,24 +34,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
-    const user = await User.create({
+    const newUser = await User.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password: hashedPassword,
-      phone: phone?.trim() || '',
+      phone: phone || '',
       role: role || 'customer',
-      address: address?.trim() || '',
-      isActive: isActive !== undefined ? isActive : true,
+      address: address || '',
+      isActive: isActive ?? true,
     });
 
-    // Create notification for user
-    const Notification = (await import('@/models/Notification')).default;
     await Notification.create({
-      userId: user._id,
+      userId: newUser._id,
       title: 'Tài khoản đã được tạo',
       message: `Tài khoản của bạn đã được tạo bởi quản trị viên với vai trò ${role}`,
       type: 'system',
@@ -61,15 +57,15 @@ export async function POST(request: NextRequest) {
       {
         message: 'Tạo người dùng thành công',
         user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
+          _id: newUser._id,
+          name: newUser.name,
+          email: newUser.email,
+          role: newUser.role,
         },
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Create user error:', error);
     return NextResponse.json(
       { error: 'Có lỗi xảy ra. Vui lòng thử lại!' },

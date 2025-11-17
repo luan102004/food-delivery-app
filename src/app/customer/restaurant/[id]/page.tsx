@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import GoogleMap from '@/components/maps/GoogleMap';
-import { useLanguage } from '@/hooks/useLanguage';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CartItem {
   menuItemId: string;
@@ -18,7 +17,6 @@ export default function RestaurantDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
-  const { t } = useLanguage();
   const restaurantId = params.id as string;
 
   const [restaurant, setRestaurant] = useState<any>(null);
@@ -47,7 +45,7 @@ export default function RestaurantDetailPage() {
       const data = await response.json();
       setRestaurant(data.restaurant);
     } catch (error) {
-      console.error('Error fetching restaurant:', error);
+      console.error('Error:', error);
     } finally {
       setLoading(false);
     }
@@ -59,7 +57,7 @@ export default function RestaurantDetailPage() {
       const data = await response.json();
       setMenuItems(data.menuItems || []);
     } catch (error) {
-      console.error('Error fetching menu:', error);
+      console.error('Error:', error);
     }
   };
 
@@ -86,11 +84,12 @@ export default function RestaurantDetailPage() {
           name: item.name,
           price: item.price,
           quantity: 1,
-          image: item.image,
         },
       ]);
     }
+    // Animation effect
     setShowCart(true);
+    setTimeout(() => setShowCart(false), 2000);
   };
 
   const updateQuantity = (menuItemId: string, delta: number) => {
@@ -109,10 +108,6 @@ export default function RestaurantDetailPage() {
     });
   };
 
-  const removeFromCart = (menuItemId: string) => {
-    setCart(cart.filter((i) => i.menuItemId !== menuItemId));
-  };
-
   const getTotalItems = () => cart.reduce((sum, item) => sum + item.quantity, 0);
   const getSubtotal = () => cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -121,17 +116,20 @@ export default function RestaurantDetailPage() {
       alert('Giỏ hàng trống!');
       return;
     }
-    // Save cart to localStorage for checkout page
     localStorage.setItem('cart', JSON.stringify({ restaurantId, items: cart }));
     router.push('/customer/checkout');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Đang tải...</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+          />
+          <p className="text-gray-600 font-medium">Đang tải...</p>
         </div>
       </div>
     );
@@ -139,391 +137,335 @@ export default function RestaurantDetailPage() {
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center text-red-600">Không tìm thấy nhà hàng</div>
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">😢</div>
+          <p className="text-red-600 text-xl font-semibold">Không tìm thấy nhà hàng</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Restaurant Header */}
-      <div className="bg-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <button
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* Restaurant Header - Gradient Style */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 opacity-90" />
+        <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 py-8">
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
             onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-800 mb-4 flex items-center gap-2"
+            className="text-white mb-4 flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full hover:bg-white/30 transition-all"
           >
             ← Quay lại
-          </button>
+          </motion.button>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {/* Restaurant Info */}
-            <div>
-              <div className="flex items-start gap-4 mb-4">
-                <div className="text-6xl">🏪</div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    {restaurant.name}
-                  </h1>
-                  <p className="text-gray-600 mb-3">{restaurant.description}</p>
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-400 text-lg">⭐</span>
-                      <span className="font-semibold">{restaurant.rating.toFixed(1)}</span>
-                    </div>
-                    <span>•</span>
-                    <span>📍 {restaurant.address}</span>
-                    <span>•</span>
-                    <span>📞 {restaurant.phone}</span>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    {restaurant.cuisine.map((c: string) => (
-                      <span
-                        key={c}
-                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-4"
+          >
+            <div className="w-20 h-20 bg-white rounded-2xl shadow-xl flex items-center justify-center text-4xl">
+              🏪
+            </div>
+            <div className="flex-1 text-white">
+              <h1 className="text-3xl font-bold mb-2">{restaurant.name}</h1>
+              <p className="text-white/90 mb-2">{restaurant.description}</p>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
+                  <span>⭐</span>
+                  <span className="font-semibold">{restaurant.rating.toFixed(1)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>📍</span>
+                  <span>{restaurant.address.split(',')[0]}</span>
                 </div>
               </div>
             </div>
+          </motion.div>
 
-            {/* Map */}
-            <div className="h-64 rounded-lg overflow-hidden">
-              <GoogleMap
-                center={{
-                  lat: restaurant.location.coordinates[1],
-                  lng: restaurant.location.coordinates[0],
-                }}
-                zoom={15}
-                markers={[
-                  {
-                    position: {
-                      lat: restaurant.location.coordinates[1],
-                      lng: restaurant.location.coordinates[0],
-                    },
-                    title: restaurant.name,
-                  },
-                ]}
-              />
-            </div>
-          </div>
+          {/* Cuisine Tags */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex gap-2 mt-4 flex-wrap"
+          >
+            {restaurant.cuisine.map((c: string) => (
+              <span
+                key={c}
+                className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-full text-sm font-medium"
+              >
+                {c}
+              </span>
+            ))}
+          </motion.div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
-          {/* Menu Section */}
-          <div className="flex-1">
-            {/* Category Filter */}
-            <div className="bg-white rounded-lg shadow-md p-4 mb-6 sticky top-4 z-10">
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(category)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                      selectedCategory === category
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {category === 'all' ? 'Tất cả' : category}
-                  </button>
-                ))}
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {/* Category Pills - Horizontal Scroll */}
+        <div className="mb-6 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 pb-2">
+            {categories.map((category, index) => (
+              <motion.button
+                key={category}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-3 rounded-full font-semibold whitespace-nowrap transition-all shadow-md ${
+                  selectedCategory === category
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white scale-105'
+                    : 'bg-white text-gray-700 hover:shadow-lg'
+                }`}
+              >
+                {category === 'all' ? '🍽️ Tất cả' : `${category}`}
+              </motion.button>
+            ))}
+          </div>
+        </div>
 
-            {/* Menu Items Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredItems.map((item) => (
-                <div
-                  key={item._id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
-                >
-                  {/* Item Image */}
-                  <div className="h-48 bg-gradient-to-br from-orange-100 to-orange-200 relative">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-6xl">
-                        🍽️
-                      </div>
-                    )}
-                    {!item.isAvailable && (
-                      <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                        <span className="bg-red-600 text-white px-4 py-2 rounded-full font-semibold">
-                          Hết hàng
-                        </span>
-                      </div>
-                    )}
+        {/* Menu Grid - Beautiful Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-24">
+          <AnimatePresence>
+            {filteredItems.map((item, index) => (
+              <motion.div
+                key={item._id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: index * 0.05 }}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1"
+              >
+                {/* Item Image */}
+                <div className="relative h-40 bg-gradient-to-br from-orange-200 via-pink-200 to-purple-200">
+                  <div className="absolute inset-0 flex items-center justify-center text-5xl">
+                    🍽️
                   </div>
+                  {!item.isAvailable && (
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                      <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        Hết hàng
+                      </span>
+                    </div>
+                  )}
+                  {item.tags.includes('Popular') && (
+                    <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      🔥 HOT
+                    </div>
+                  )}
+                </div>
 
-                  {/* Item Info */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2">
-                      {item.name}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
+                {/* Item Info */}
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 mb-1 line-clamp-2">
+                    {item.name}
+                  </h3>
+                  <p className="text-xs text-gray-500 mb-2 line-clamp-1">
+                    {item.description}
+                  </p>
 
-                    <div className="flex items-center gap-2 mb-3">
-                      {item.tags.map((tag: string) => (
+                  {/* Tags */}
+                  {item.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {item.tags.slice(0, 2).map((tag: string) => (
                         <span
                           key={tag}
-                          className="text-xs bg-gray-100 px-2 py-1 rounded"
+                          className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
+                  )}
 
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-2xl font-bold text-blue-600">
-                          {new Intl.NumberFormat('vi-VN', {
-                            style: 'currency',
-                            currency: 'VND',
-                          }).format(item.price)}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          ⏱️ {item.preparationTime} phút
-                        </p>
-                      </div>
-
-                      <button
-                        onClick={() => addToCart(item)}
-                        disabled={!item.isAvailable}
-                        className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                          item.isAvailable
-                            ? 'bg-blue-600 text-white hover:bg-blue-700'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        + Thêm
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filteredItems.length === 0 && (
-              <div className="text-center py-12 bg-white rounded-lg shadow-md">
-                <p className="text-gray-500">Không có món nào trong danh mục này</p>
-              </div>
-            )}
-          </div>
-
-          {/* Cart Sidebar - Desktop */}
-          <div className="hidden lg:block w-96">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                🛒 Giỏ hàng ({getTotalItems()})
-              </h3>
-
-              {cart.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="text-6xl mb-4">🛒</div>
-                  <p>Giỏ hàng trống</p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
-                    {cart.map((item) => (
-                      <div
-                        key={item.menuItemId}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex-1">
-                          <p className="font-semibold text-gray-900">{item.name}</p>
-                          <p className="text-sm text-blue-600 font-medium">
-                            {new Intl.NumberFormat('vi-VN', {
-                              style: 'currency',
-                              currency: 'VND',
-                            }).format(item.price)}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => updateQuantity(item.menuItemId, -1)}
-                            className="w-8 h-8 bg-gray-200 rounded-full hover:bg-gray-300 flex items-center justify-center"
-                          >
-                            -
-                          </button>
-                          <span className="w-8 text-center font-semibold">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => updateQuantity(item.menuItemId, 1)}
-                            className="w-8 h-8 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center justify-center"
-                          >
-                            +
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={() => removeFromCart(item.menuItemId)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t pt-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">Tạm tính:</span>
-                      <span className="font-semibold">
-                        {new Intl.NumberFormat('vi-VN', {
-                          style: 'currency',
-                          currency: 'VND',
-                        }).format(getSubtotal())}
-                      </span>
-                    </div>
-                    <div className="flex justify-between mb-4">
-                      <span className="text-gray-600">Phí giao hàng:</span>
-                      <span className="font-semibold">15,000₫</span>
-                    </div>
-                    <div className="flex justify-between text-lg font-bold mb-4">
-                      <span>Tổng cộng:</span>
-                      <span className="text-blue-600">
-                        {new Intl.NumberFormat('vi-VN', {
-                          style: 'currency',
-                          currency: 'VND',
-                        }).format(getSubtotal() + 15000)}
-                      </span>
+                  {/* Price & Button */}
+                  <div className="flex items-center justify-between mt-3">
+                    <div>
+                      <p className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                        {new Intl.NumberFormat('vi-VN').format(item.price)}₫
+                      </p>
+                      <p className="text-xs text-gray-500">⏱️ {item.preparationTime}p</p>
                     </div>
 
-                    <button
-                      onClick={handleCheckout}
-                      className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => addToCart(item)}
+                      disabled={!item.isAvailable}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-all ${
+                        item.isAvailable
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-xl'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
                     >
-                      Đặt hàng ngay →
-                    </button>
+                      <span className="text-xl">+</span>
+                    </motion.button>
                   </div>
-                </>
-              )}
-            </div>
-          </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
+
+        {filteredItems.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-center py-20"
+          >
+            <div className="text-6xl mb-4">🍽️</div>
+            <p className="text-gray-500 text-lg">Không có món nào trong danh mục này</p>
+          </motion.div>
+        )}
       </div>
 
-      {/* Mobile Cart Button */}
-      {cart.length > 0 && (
-        <div className="lg:hidden fixed bottom-4 right-4 z-50">
-          <button
-            onClick={() => setShowCart(!showCart)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 hover:bg-blue-700"
+      {/* Floating Cart Button - Mobile */}
+      <AnimatePresence>
+        {cart.length > 0 && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-4 left-4 right-4 z-50"
           >
-            🛒 {getTotalItems()} món
-            <span className="font-bold">
-              {new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND',
-              }).format(getSubtotal())}
-            </span>
-          </button>
-        </div>
-      )}
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowCart(true)}
+              className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white py-4 rounded-2xl shadow-2xl flex items-center justify-between px-6 font-bold"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                  <span className="text-xl">🛒</span>
+                </div>
+                <div className="text-left">
+                  <p className="text-sm opacity-90">Giỏ hàng</p>
+                  <p className="text-lg font-bold">{getTotalItems()} món</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm opacity-90">Tổng cộng</p>
+                <p className="text-xl font-bold">
+                  {new Intl.NumberFormat('vi-VN').format(getSubtotal())}₫
+                </p>
+              </div>
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Mobile Cart Modal */}
-      {showCart && (
-        <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50">
-          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold">
-                🛒 Giỏ hàng ({getTotalItems()})
-              </h3>
-              <button
-                onClick={() => setShowCart(false)}
-                className="text-gray-500 text-2xl"
-              >
-                ✕
-              </button>
-            </div>
+      {/* Cart Modal - Bottom Sheet Style */}
+      <AnimatePresence>
+        {showCart && cart.length > 0 && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCart(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30 }}
+              className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[80vh] overflow-hidden"
+            >
+              {/* Handle Bar */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+              </div>
 
-            <div className="space-y-3 mb-4">
-              {cart.map((item) => (
-                <div
-                  key={item.menuItemId}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 border-b">
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  🛒 Giỏ hàng ({getTotalItems()})
+                </h3>
+                <button
+                  onClick={() => setShowCart(false)}
+                  className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{item.name}</p>
-                    <p className="text-sm text-blue-600 font-medium">
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      }).format(item.price)}
-                    </p>
-                  </div>
+                  ✕
+                </button>
+              </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => updateQuantity(item.menuItemId, -1)}
-                      className="w-8 h-8 bg-gray-200 rounded-full"
+              {/* Cart Items */}
+              <div className="overflow-y-auto max-h-96 px-6 py-4">
+                <div className="space-y-3">
+                  {cart.map((item) => (
+                    <motion.div
+                      key={item.menuItemId}
+                      layout
+                      className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl"
                     >
-                      -
-                    </button>
-                    <span className="w-8 text-center font-semibold">
-                      {item.quantity}
+                      <div className="flex-1">
+                        <p className="font-bold text-gray-900">{item.name}</p>
+                        <p className="text-sm font-semibold text-purple-600">
+                          {new Intl.NumberFormat('vi-VN').format(item.price)}₫
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => updateQuantity(item.menuItemId, -1)}
+                          className="w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center font-bold text-purple-600"
+                        >
+                          -
+                        </motion.button>
+                        <span className="w-8 text-center font-bold text-lg">
+                          {item.quantity}
+                        </span>
+                        <motion.button
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => updateQuantity(item.menuItemId, 1)}
+                          className="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full shadow-md flex items-center justify-center font-bold"
+                        >
+                          +
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="border-t px-6 py-4 bg-gray-50">
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Tạm tính:</span>
+                    <span className="font-semibold">
+                      {new Intl.NumberFormat('vi-VN').format(getSubtotal())}₫
                     </span>
-                    <button
-                      onClick={() => updateQuantity(item.menuItemId, 1)}
-                      className="w-8 h-8 bg-blue-600 text-white rounded-full"
-                    >
-                      +
-                    </button>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Phí giao hàng:</span>
+                    <span className="font-semibold">15,000₫</span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold">
+                    <span>Tổng cộng:</span>
+                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                      {new Intl.NumberFormat('vi-VN').format(getSubtotal() + 15000)}₫
+                    </span>
                   </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="border-t pt-4">
-              <div className="flex justify-between mb-2">
-                <span>Tạm tính:</span>
-                <span className="font-semibold">
-                  {new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                  }).format(getSubtotal())}
-                </span>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCheckout}
+                  className="w-full bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl"
+                >
+                  Đặt hàng ngay 🚀
+                </motion.button>
               </div>
-              <div className="flex justify-between mb-4">
-                <span>Phí giao hàng:</span>
-                <span className="font-semibold">15,000₫</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold mb-4">
-                <span>Tổng cộng:</span>
-                <span className="text-blue-600">
-                  {new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                  }).format(getSubtotal() + 15000)}
-                </span>
-              </div>
-
-              <button
-                onClick={handleCheckout}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold"
-              >
-                Đặt hàng ngay →
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

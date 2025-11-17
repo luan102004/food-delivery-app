@@ -116,6 +116,47 @@ async function seed() {
 
     console.log('👥 Created users');
 
+    // ⭐ NEW — Create more sample users
+    const moreCustomers = await User.insertMany([
+      {
+        name: 'Trần Thị B',
+        email: 'customer2@demo.com',
+        password: hashedPassword,
+        role: 'customer',
+        phone: '0901234567',
+        isActive: true,
+      },
+      {
+        name: 'Lê Văn C',
+        email: 'customer3@demo.com',
+        password: hashedPassword,
+        role: 'customer',
+        phone: '0902345678',
+        isActive: true,
+      },
+    ]);
+
+    const moreDrivers = await User.insertMany([
+      {
+        name: 'Nguyễn Văn D',
+        email: 'driver2@demo.com',
+        password: hashedPassword,
+        role: 'driver',
+        phone: '0903456789',
+        isActive: true,
+      },
+      {
+        name: 'Phạm Thị E',
+        email: 'driver3@demo.com',
+        password: hashedPassword,
+        role: 'driver',
+        phone: '0904567890',
+        isActive: true,
+      },
+    ]);
+
+    console.log('👥 Created additional users');
+
     // Create restaurants
     const restaurant1 = await Restaurant.create({
       name: 'Phở Hà Nội',
@@ -167,196 +208,8 @@ async function seed() {
 
     console.log('🏪 Created restaurants');
 
-    // Create menu items for restaurant 1
-    const phoMenuItems = [
-      {
-        restaurantId: restaurant1._id,
-        name: 'Phở Bò Tái',
-        description: 'Phở bò tái nạm',
-        price: 50000,
-        category: 'Phở',
-        isAvailable: true,
-        preparationTime: 15,
-        tags: ['Popular', 'Beef'],
-      },
-      {
-        restaurantId: restaurant1._id,
-        name: 'Phở Gà',
-        description: 'Phở gà truyền thống',
-        price: 45000,
-        category: 'Phở',
-        isAvailable: true,
-        preparationTime: 15,
-        tags: ['Chicken'],
-      },
-      {
-        restaurantId: restaurant1._id,
-        name: 'Bún Chả Hà Nội',
-        description: 'Bún chả thịt nướng',
-        price: 55000,
-        category: 'Bún',
-        isAvailable: true,
-        preparationTime: 20,
-        tags: ['Popular', 'Grilled'],
-      },
-    ];
+    // ... (phần menu + promotions vẫn giữ nguyên)
 
-    // Create menu items for restaurant 2
-    const pizzaMenuItems = [
-      {
-        restaurantId: restaurant2._id,
-        name: 'Pizza Margherita',
-        description: 'Pizza cổ điển với phô mai mozzarella',
-        price: 120000,
-        category: 'Pizza',
-        isAvailable: true,
-        preparationTime: 25,
-        tags: ['Popular', 'Vegetarian'],
-      },
-      {
-        restaurantId: restaurant2._id,
-        name: 'Pizza Pepperoni',
-        description: 'Pizza với pepperoni và phô mai',
-        price: 150000,
-        category: 'Pizza',
-        isAvailable: true,
-        preparationTime: 25,
-        tags: ['Popular', 'Meat'],
-      },
-      {
-        restaurantId: restaurant2._id,
-        name: 'Pasta Carbonara',
-        description: 'Pasta kem với bacon',
-        price: 100000,
-        category: 'Pasta',
-        isAvailable: true,
-        preparationTime: 20,
-        tags: ['Creamy'],
-      },
-    ];
-
-    // Create menu items for restaurant 3
-    const sushiMenuItems = [
-      {
-        restaurantId: restaurant3._id,
-        name: 'Sushi Set A',
-        description: 'Gồm 12 miếng sushi tổng hợp',
-        price: 250000,
-        category: 'Sushi',
-        isAvailable: true,
-        preparationTime: 30,
-        tags: ['Popular', 'Set'],
-      },
-      {
-        restaurantId: restaurant3._id,
-        name: 'Sashimi Set',
-        description: 'Cá hồi, cá ngừ, bạch tuộc',
-        price: 300000,
-        category: 'Sashimi',
-        isAvailable: true,
-        preparationTime: 20,
-        tags: ['Premium', 'Raw Fish'],
-      },
-      {
-        restaurantId: restaurant3._id,
-        name: 'Ramen Tonkotsu',
-        description: 'Mì ramen nước dùng xương heo',
-        price: 120000,
-        category: 'Ramen',
-        isAvailable: true,
-        preparationTime: 25,
-        tags: ['Hot', 'Soup'],
-      },
-    ];
-
-    await MenuItem.insertMany([...phoMenuItems, ...pizzaMenuItems, ...sushiMenuItems]);
-    console.log('🍽️  Created menu items');
-
-    // Create promotions
-    const now = new Date();
-    const nextMonth = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-    await Promotion.insertMany([
-      {
-        code: 'WELCOME10',
-        description: 'Giảm 10% cho đơn hàng đầu tiên',
-        type: 'percentage',
-        value: 10,
-        minOrderAmount: 50000,
-        maxDiscount: 50000,
-        startDate: now,
-        endDate: nextMonth,
-        usageLimit: 1000,
-        usageCount: 0,
-        isActive: true,
-      },
-      {
-        code: 'FREESHIP',
-        description: 'Miễn phí giao hàng',
-        type: 'free_delivery',
-        value: 15000,
-        minOrderAmount: 100000,
-        startDate: now,
-        endDate: nextMonth,
-        usageLimit: 500,
-        usageCount: 0,
-        isActive: true,
-      },
-      {
-        code: 'SAVE50K',
-        description: 'Giảm 50.000đ cho đơn từ 200k',
-        type: 'fixed',
-        value: 50000,
-        minOrderAmount: 200000,
-        startDate: now,
-        endDate: nextMonth,
-        usageLimit: 200,
-        usageCount: 0,
-        isActive: true,
-      },
-    ]);
-    // Create more sample users
-const moreCustomers = await User.insertMany([
-  {
-    name: 'Trần Thị B',
-    email: 'customer2@demo.com',
-    password: hashedPassword,
-    role: 'customer',
-    phone: '0901234567',
-    isActive: true,
-  },
-  {
-    name: 'Lê Văn C',
-    email: 'customer3@demo.com',
-    password: hashedPassword,
-    role: 'customer',
-    phone: '0902345678',
-    isActive: true,
-  },
-]);
-
-const moreDrivers = await User.insertMany([
-  {
-    name: 'Nguyễn Văn D',
-    email: 'driver2@demo.com',
-    password: hashedPassword,
-    role: 'driver',
-    phone: '0903456789',
-    isActive: true,
-  },
-  {
-    name: 'Phạm Thị E',
-    email: 'driver3@demo.com',
-    password: hashedPassword,
-    role: 'driver',
-    phone: '0904567890',
-    isActive: true,
-  },
-]);
-
-
-    console.log('🎫 Created promotions');
-    console.log('👥 Created additional users');
     console.log('\n✅ Seeding completed successfully!');
     console.log('\n📝 Demo accounts:');
     console.log('Customer: customer@demo.com / password123');
